@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 class TodoTask(models.Model):
 
@@ -37,8 +38,14 @@ class TodoTask(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    due_date = models.DateTimeField(help_text="Due date for the task")
+
+
     def __str__(self):
         return f"{self.title} - {self.get_stage_display()}"
+    
+    def is_overdue(self):
+        return timezone.now() > self.due_date and self.stage != 'completed'
 
     class Meta:
         ordering = ['-created_at']

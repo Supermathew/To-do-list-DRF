@@ -4,6 +4,8 @@ from rest_framework.test import APITestCase
 from accounts.models import Account
 from .models import TodoTask
 from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 class TodoTaskAPITestCase(APITestCase):
     def setUp(self):
@@ -27,6 +29,7 @@ class TodoTaskAPITestCase(APITestCase):
         self.todo_task_data = {
             'title': 'Buy groceries',
             'description': 'Milk, eggs, bread',
+            'due_date': (timezone.now() + timedelta(days=1)).isoformat(),
         }
         self.todo_task = TodoTask.objects.create(user=self.user, **self.todo_task_data)
 
@@ -55,6 +58,7 @@ class TodoTaskAPITestCase(APITestCase):
         data = {
             'title': 'Maths Assignments',
             'description': 'Need to complete the maths assignments or else less marks',
+            'due_date': (timezone.now() + timedelta(days=1)).isoformat(),
         }
 
         response = self.client.post(self.todo_task_list_create_url, data, format='json')
@@ -91,6 +95,7 @@ class TodoTaskAPITestCase(APITestCase):
         data = {
             'title': 'This is a updated title',
             'description': 'The description is updated',
+            'due_date': (timezone.now() + timedelta(days=2)).isoformat(),
         }
 
         response = self.client.put(self.todo_task_detail_url, data, format='json')
@@ -125,6 +130,7 @@ class TodoTaskAPITestCase(APITestCase):
         data = {
             'title': 'Complete project',
             'description': 'Finish writing tests for the project',
+            'due_date': (timezone.now() + timedelta(days=1)).isoformat(),
         }
 
         response = self.client.post(self.todo_task_list_create_url, data, format='json')
@@ -138,6 +144,7 @@ class TodoTaskAPITestCase(APITestCase):
         data = {
             'title': 'Updated task',
             'description': 'Updated description for the task',
+            'due_date': (timezone.now() + timedelta(days=2)).isoformat(),
         }
 
         response = self.client.put(self.todo_task_detail_url, data, format='json')
@@ -158,3 +165,20 @@ class TodoTaskAPITestCase(APITestCase):
         self.client.credentials()
         response = self.client.delete(self.delete_all_tasks_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_todo_task_past_due_datetime(self):
+        """
+        This is the Test that the user cannot create a task with a due_date in the past.
+        """
+        past_due_datetime = (timezone.now() - timedelta(days=1)).isoformat()
+
+        data = {
+            'title': 'Test Past Task',
+            'description': 'This task should not be allowed because its due datetime is in the past.',
+            'due_date': past_due_datetime,
+        }
+
+        response = self.client.post(self.todo_task_list_create_url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['errors']['due_date'][0], 'Due datetime must be a future date.')

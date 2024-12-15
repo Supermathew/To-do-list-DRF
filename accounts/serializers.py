@@ -18,8 +18,6 @@ class LoginSerializer(serializers.Serializer):
         except Account.DoesNotExist:
             raise serializers.ValidationError('Account with This email does not Exist please create one')
 
-        if not user.is_active:
-            raise serializers.ValidationError('User account is inactive. Please verify your email.')
 
         user = authenticate(email=email, password=password)
 
@@ -38,5 +36,20 @@ class LoginSerializer(serializers.Serializer):
             password=validated_data['password']
         )
         update_last_login(None, user)
+        return user
+    
+class RegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Account
+        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password', 'username']
+
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        password = validated_data.pop('password')
+        user = Account.objects.create_user(username=username,**validated_data)
+        user.set_password(password)
+        user.save()
         return user
       

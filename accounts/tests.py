@@ -57,7 +57,10 @@ class AccountAPITestCase(APITestCase):
         response = self.client.post(self.register_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', response.data)
-        self.assertEqual(response.data['errors'], 'All fields are required')
+        self.assertEqual(
+            response.data['errors']['phone_number'][0],
+            'This field is required.'
+        )
 
     def test_register_user_email_taken(self):
         """
@@ -75,8 +78,11 @@ class AccountAPITestCase(APITestCase):
         response = self.client.post(self.register_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', response.data)
-        self.assertEqual(response.data['errors'], 'Email is already registered')
-
+        self.assertIn('email', response.data['errors'])
+        self.assertEqual(
+            response.data['errors']['email'][0],
+            'account with this email already exists.'
+        )
     def test_login_user(self):
         """
         This is a test to test the user login functionality

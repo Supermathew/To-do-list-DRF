@@ -72,6 +72,7 @@ python manage.py runserver
 ## Testing
 
 ### Running Tests
+All the test case are written in their respective test.py file in the app(accounts and todo_app) with comments.
 To run tests for specific apps:
 
 ```bash

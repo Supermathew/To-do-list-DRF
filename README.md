@@ -38,7 +38,7 @@ pip install -r requirements.txt
 1. Create a PostgreSQL database
 ```sql
 CREATE DATABASE tododb;
-CREATE USER todoadmin WITH PASSWORD 'your_strong_password';
+CREATE USER todoadmin WITH PASSWORD 'passwordstrong';
 GRANT ALL PRIVILEGES ON DATABASE tododb TO todoadmin;
 ```
 
@@ -49,7 +49,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tododb',
         'USER': 'todoadmin',
-        'PASSWORD': 'your_strong_password',
+        'PASSWORD': 'strong password',
         'HOST': 'localhost',
         'PORT': '5432',
     }
